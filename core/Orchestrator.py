@@ -1,8 +1,11 @@
 
+from db import Database
+
 class Orchestrator:
     # Menu String
     menu = ("TuckOnomics Menu:\n"
     "1) Add new position\n"
+    "2) Position Review\n"
     "q) Quit\n"
     "Enter Selection... ")
 
@@ -19,17 +22,24 @@ class Orchestrator:
                 return opt
     
     def run(self):
-        db = input("Welcome to TuckOnomics\n"
+        db_name = input("Welcome to TuckOnomics\n"
                    "What database would you like to access... ")
         print()
 
+        db =Database(db_name)
+
         while True:
             opt = self.menu_input()
+            print()
 
             if opt == "1":
                 pass
             
+            elif opt == "2":
+                pass
+
             elif opt == "q":
                 break
+            
 
 
