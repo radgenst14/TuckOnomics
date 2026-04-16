@@ -5,7 +5,7 @@ class Orchestrator:
     # Menu String
     menu = ("TuckOnomics Menu:\n"
     "1) Add new position\n"
-    "2) Position Review\n"
+    "2) Review\n"
     "q) Quit\n"
     "Enter Selection... ")
 
@@ -24,10 +24,16 @@ class Orchestrator:
     def run(self):
         db_name = input("Welcome to TuckOnomics\n"
                    "What database would you like to access... ")
-        print()
 
         db =Database(db_name)
 
+        opt = input("If you would like to delete, hit d. Otherwise press enter to continue... ")
+        print()
+
+        if opt == "d":
+            db.remove_db()
+            return
+        
         while True:
             opt = self.menu_input()
             print()

@@ -1,5 +1,7 @@
 import sqlite3
 from pathlib import Path
+from datetime import date
+from models import Position
 
 class Database:
 
@@ -19,9 +21,48 @@ class Database:
             CREATE TABLE IF NOT EXISTS portfolio
                      (
                      id INTEGER PRIMARY KEY AUTOINCREMENT
+                     tckr TEXT NOT NULL
+                     shares REAL NOT NULL
+                     cost_basis REAL NOT NULL
+                     purchase_date TEXT NOT NULL
                      )
             """)
         conn.commit()
         conn.close()
 
+    def remove_db(self):
+        self.__path.unlink(missing_ok=True)
+
+    def get_all_positions(self):
+        # connect to database and select all positions from the portfolio
+        conn = self.get_connection()
+        rows = conn.execute(
+            """
+            SELECT * FROM portfolio
+            """
+        )
+        conn.close()
+        
+        # for each row create a position object and append to the returned positions lst
+        positions = []
+        for r in rows:
+            p = Position(
+                id=r["id"],
+                tckr=r["tckr"],
+                shares=r["shares"],
+                cost_basis=r["cost_basis"],
+                purchase_date=r["purchase_date"]
+            )
+            positions.append(p)
+        
+        return positions
     
+    def add_position(self, tckr: str, shares: float, cost_basis: float, purchase_date: date):
+        conn = self.get_connection()
+        cursor = conn.execute(
+            "INSERT INTO portfolio (ticker, shares, cost_per_share, purchase_date) VALUES (?, ?, ?, ?)",
+            (tckr.upper(), shares, cost_basis, purchase_date.isoformat())
+        )
+        row_id = cursor.lastrowid
+        conn.close()
+        return row_id
