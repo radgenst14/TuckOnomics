@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
 from datetime import date
-from models import Position
+from db.Models import Position
 
 class Database:
 
@@ -20,10 +20,10 @@ class Database:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS portfolio
                      (
-                     id INTEGER PRIMARY KEY AUTOINCREMENT
-                     tckr TEXT NOT NULL
-                     shares REAL NOT NULL
-                     cost_basis REAL NOT NULL
+                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                     tckr TEXT NOT NULL,
+                     shares REAL NOT NULL,
+                     cost_basis REAL NOT NULL,
                      purchase_date TEXT NOT NULL
                      )
             """)
@@ -41,7 +41,6 @@ class Database:
             SELECT * FROM portfolio
             """
         )
-        conn.close()
         
         # for each row create a position object and append to the returned positions lst
         positions = []
@@ -54,15 +53,27 @@ class Database:
                 purchase_date=r["purchase_date"]
             )
             positions.append(p)
-        
+            
+        conn.close()
+
         return positions
     
     def add_position(self, tckr: str, shares: float, cost_basis: float, purchase_date: date):
         conn = self.get_connection()
         cursor = conn.execute(
-            "INSERT INTO portfolio (ticker, shares, cost_per_share, purchase_date) VALUES (?, ?, ?, ?)",
+            "INSERT INTO portfolio (tckr, shares, cost_basis, purchase_date) VALUES (?, ?, ?, ?)",
             (tckr.upper(), shares, cost_basis, purchase_date.isoformat())
         )
+        conn.commit()
         row_id = cursor.lastrowid
         conn.close()
         return row_id
+
+    def remove_position(self, tckr: str, purchase_date: date):
+        conn = self.get_connection()
+        conn.execute(
+            "DELETE FROM portfolio WHERE tckr = ? AND purchase_date = ?",
+            (tckr.upper(), purchase_date.isoformat())
+        )
+        conn.commit()
+        conn.close()
